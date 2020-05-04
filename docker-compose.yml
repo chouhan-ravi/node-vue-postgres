@@ -1,0 +1,50 @@
+# docker-compose.yml
+version: '3'
+services:
+  nodeapp:
+    container_name: node_api
+    restart: always
+    build: ./node-app
+    ports:
+      - 3000:3000
+    environment:
+      CORS_URL: http://localhost:8080
+      POSTGRES_DATABASE_URL: postgres://postgres:postgres@postgresdb:5432/alarmsdb
+      POSTGRES_HOST: postgresdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: alarmsdb
+      POSTGRES_DIALECT: postgres
+      PORT: 3000
+      
+    depends_on:
+      - postgresdb
+    links:
+      - postgresdb
+
+  postgresdb:
+    container_name: postgres_db
+    restart: always
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: alarmsdb
+  
+  vueapp:
+    container_name: vue_app
+    restart: always
+    build: ./vue-app
+    ports: 
+      - 8080:8080
+    environment: 
+      API_URL: http://localhost:3000
+      BASIC_AUTH_KEY: dGVzdDp0ZXN0 # test:test
+      PORT: 8080
+    
+    depends_on: 
+      - nodeapp
+    links:
+      - nodeapp
